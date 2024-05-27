@@ -19,4 +19,3 @@ langchainhub
 langchain-groq
 beautifulsoup4
 langchain_groq
-PyMuPDFLoader
