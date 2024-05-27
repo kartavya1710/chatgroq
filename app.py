@@ -9,7 +9,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import create_retrieval_chain
 from langchain.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.document_loaders import PyMuPDFLoader
+
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -38,7 +38,7 @@ uploaded_file = st.file_uploader("Choose a file", type=["pdf"])
 def vector_embeddings():
     if "vectors" not in st.session_state:
         st.session_state.embeddings = HuggingFaceEmbeddings()
-        st.session_state.loader = PyMuPDFLoader(uploaded_file.name) # Data Injection
+        st.session_state.loader = PyPDFLoader(uploaded_file.name) # Data Injection
         st.session_state.docs = st.session_state.loader.load() # Document Loading
         st.session_state.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200) # Chunk Creation
         st.session_state.final_documents = st.session_state.text_splitter.split_documents(st.session_state.docs[:20]) # Document splitting
