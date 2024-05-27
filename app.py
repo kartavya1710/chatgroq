@@ -38,7 +38,7 @@ uploaded_file = st.file_uploader("Choose a file", type=["pdf"])
 def vector_embeddings():
     if "vectors" not in st.session_state:
         st.session_state.embeddings = HuggingFaceEmbeddings()
-        st.session_state.loader = UnstructuredPDFLoader(uploaded_file) # Data Injection
+        st.session_state.loader = UnstructuredPDFLoader(uploaded_file.name) # Data Injection
         st.session_state.docs = st.session_state.loader.load() # Document Loading
         st.session_state.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200) # Chunk Creation
         st.session_state.final_documents = st.session_state.text_splitter.split_documents(st.session_state.docs[:20]) # Document splitting
