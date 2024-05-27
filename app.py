@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 #Load groq API Keys.
-groq_api_key = os.getenv("groq_api_key")
+groq_api_key = "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"
 
 st.title("ChatGroq with LLAMA3 Demo :sparkles:")
 
