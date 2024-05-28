@@ -1,4 +1,4 @@
-import streamlit as st
+    import streamlit as st
 import os
 from langchain_groq import ChatGroq
 from langchain.embeddings import HuggingFaceEmbeddings
@@ -72,7 +72,7 @@ if uploaded_file is not None:
         f.write(uploaded_file.getbuffer())
 
     file_url = f"http://localhost:8000/uploads/{filename}"
-
+st.write(file_url)
 def vector_embeddings():
     if "vectors" not in st.session_state:
         st.session_state.embeddings = HuggingFaceEmbeddings()
