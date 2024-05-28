@@ -38,7 +38,7 @@ bytes_data = uploaded_file.read()
 def vector_embeddings():
     if "vectors" not in st.session_state:
         st.session_state.embeddings = HuggingFaceEmbeddings()
-        st.session_state.loader = PyPDFLoader(os.path.join("/tmp", uploaded_file.name)) # Data Injection
+        st.session_state.loader = PyPDFLoader(uploaded_file.name) # Data Injection
         st.session_state.docs = st.session_state.loader.load() # Document Loading
         st.session_state.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200) # Chunk Creation
         st.session_state.final_documents = st.session_state.text_splitter.split_documents(st.session_state.docs[:20]) # Document splitting
