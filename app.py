@@ -11,6 +11,11 @@ from langchain.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
 
 
+from flask import Flask, send_from_directory
+from werkzeug.utils import secure_filename
+from threading import Thread
+
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -32,13 +37,46 @@ Question : {input}
 """
 )
 
-uploaded_file = st.file_uploader("Choose a file", type=["pdf"])
-bytes_data = uploaded_file.read()
+# Set up a directory to save the uploaded files
+UPLOAD_FOLDER = 'uploads'
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+# Function to run Flask server
+def run_flask():
+    app = Flask(__name__)
+
+    @app.route('/uploads/<filename>')
+    def uploaded_file(filename):
+        return send_from_directory(UPLOAD_FOLDER, filename)
+
+    app.run(port=8000)
+
+# Start Flask server in a separate thread
+if 'flask_thread' not in st.session_state:
+    flask_thread = Thread(target=run_flask)
+    flask_thread.start()
+    st.session_state['flask_thread'] = flask_thread
+
+# Streamlit file uploader widget
+uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+
+if uploaded_file is not None:
+    # Secure the file name
+    filename = secure_filename(uploaded_file.name)
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    
+    # Save the uploaded file to the specified file path
+    with open(file_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+
+    file_url = f"http://localhost:8000/uploads/{filename}"
 
 def vector_embeddings():
     if "vectors" not in st.session_state:
         st.session_state.embeddings = HuggingFaceEmbeddings()
-        st.session_state.loader = PyPDFLoader(uploaded_file.name) # Data Injection
+        st.session_state.loader = PyPDFLoader(file_url) # Data Injection
         st.session_state.docs = st.session_state.loader.load() # Document Loading
         st.session_state.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200) # Chunk Creation
         st.session_state.final_documents = st.session_state.text_splitter.split_documents(st.session_state.docs[:20]) # Document splitting
