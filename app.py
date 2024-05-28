@@ -33,7 +33,7 @@ Question : {input}
 )
 
 uploaded_file = st.file_uploader("Choose a file", type=["pdf"])
-
+bytes_data = uploaded_file.read()
 
 def vector_embeddings():
     if "vectors" not in st.session_state:
