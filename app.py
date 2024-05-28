@@ -10,21 +10,19 @@ from langchain.chains import create_retrieval_chain
 from langchain.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
 
-
 from flask import Flask, send_from_directory
 from werkzeug.utils import secure_filename
 from threading import Thread
 
-
 from dotenv import load_dotenv
 load_dotenv()
 
-#Load groq API Keys.
+# Load groq API Keys.
 groq_api_key = "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"
 
 st.title("ChatGroq with LLAMA3 Demo :sparkles:")
 
-llm = ChatGroq(groq_api_key=groq_api_key ,model_name = "llama3-8b-8192")
+llm = ChatGroq(groq_api_key=groq_api_key, model_name="llama3-8b-8192")
 
 prompt = ChatPromptTemplate.from_template(
 """
@@ -33,7 +31,7 @@ Please provide Accurate response based on question and explain it widely.
 <context>
 {context}
 <context>
-Question : {input}
+Question: {input}
 """
 )
 
@@ -62,6 +60,8 @@ if 'flask_thread' not in st.session_state:
 # Streamlit file uploader widget
 uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
+file_url = None  # Initialize file_url
+
 if uploaded_file is not None:
     # Secure the file name
     filename = secure_filename(uploaded_file.name)
@@ -72,31 +72,32 @@ if uploaded_file is not None:
         f.write(uploaded_file.getbuffer())
 
     file_url = f"http://localhost:8000/uploads/{filename}"
-st.write(file_url)
+    st.write(file_url)
+
 def vector_embeddings():
     if "vectors" not in st.session_state:
         st.session_state.embeddings = HuggingFaceEmbeddings()
-        st.session_state.loader = PyPDFLoader(file_url) # Data Injection
-        st.session_state.docs = st.session_state.loader.load() # Document Loading
-        st.session_state.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200) # Chunk Creation
-        st.session_state.final_documents = st.session_state.text_splitter.split_documents(st.session_state.docs[:20]) # Document splitting
-        st.session_state.vectors = FAISS.from_documents(st.session_state.final_documents,st.session_state.embeddings) # vector Huggingface Embedding
+        st.session_state.loader = PyPDFLoader(file_path)  # Data Injection
+        st.session_state.docs = st.session_state.loader.load()  # Document Loading
+        st.session_state.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)  # Chunk Creation
+        st.session_state.final_documents = st.session_state.text_splitter.split_documents(st.session_state.docs[:20])  # Document splitting
+        st.session_state.vectors = FAISS.from_documents(st.session_state.final_documents, st.session_state.embeddings)  # Vector Huggingface Embedding
 
-prompt1 = st.text_input("Enter the Question from your Mind : ")
-
+prompt1 = st.text_input("Enter the Question from your Mind:")
 
 if st.button("Document Embeddings"):
     vector_embeddings()
     st.write("Vector store DB is Ready.")
 
 if prompt1:
-    document_chain = create_stuff_documents_chain(llm,prompt)
-    retriver = st.session_state.vectors.as_retriever()
-    retrival_chain = create_retrieval_chain(retriver,document_chain)
+    document_chain = create_stuff_documents_chain(llm, prompt)
+    retriever = st.session_state.vectors.as_retriever()
+    retrieval_chain = create_retrieval_chain(retriever, document_chain)
 
-    response = retrival_chain.invoke({'input':prompt1})
+    response = retrieval_chain.invoke({'input': prompt1})
     st.write(response['answer'])
 
 st.header('', divider='rainbow')
 st.markdown('''
-    Developed by KARTAVYA MASTER 	:8ball:''')
+    Developed by KARTAVYA MASTER :8ball:
+''')
